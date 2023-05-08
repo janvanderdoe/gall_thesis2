@@ -21,6 +21,8 @@ for(col in rel_cols) {
 }
 t(data_summary)
 
+#Deciles price
+quantile(data$price_75, probs = seq(.1, .9, by = .1), na.rm = T)
 #Bar plot processing versus category
 data %>% ggplot() +
   geom_bar(aes(median_NDC_scores, rating), position = "dodge", stat = "summary", fun.y = "mean") +
@@ -165,6 +167,42 @@ data %>% filter(!is.na(median_price)) %>% group_by(median_price) %>% summarize(
     plot.title = element_text(hjust = 0.5, size=14,face="bold")
   )
 
+#bottom with top decile comparison
+data$decile_price <- ntile(data$price_75, 10)
+
+data %>% filter(decile_price == 1 | decile_price == 4) 
+data %>% group_by(decile_price, median_NDC_scores) %>% summarize(
+  mean.rating = mean(rating, na.rm = TRUE),
+  sd.rating = sd(rating, na.rm = TRUE),
+  n.rating = n()) %>% 
+  mutate(se.rating = sd.rating / sqrt(n.rating),
+         lower.ci.rating = mean.rating - qt(1 - (0.05 / 2), n.rating - 1) * se.rating,
+         upper.ci.rating = mean.rating + qt(1 - (0.05 / 2), n.rating - 1) * se.rating) %>% 
+  ggplot(aes(median_NDC_scores, mean.rating)) + geom_col(fill="gray", alpha=1) +
+  facet_wrap(~decile_price) +
+  geom_errorbar( aes(x=median_NDC_scores, ymin=lower.ci.rating, ymax=upper.ci.rating), width=0.4, colour="black", alpha=0.8, size=0.8) +
+  geom_text(aes(label = round(mean.rating, 3)), vjust = 6) +
+  ylab("rating") +
+  xlab("Median split of the Dale-Chall scores") +
+  theme(axis.ticks.x=element_blank()) +
+  coord_cartesian(ylim=c(4,5)) +
+  ggtitle("Ratings for easy vs hard processing fluency for lowest vs highest price deci vs wine") +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    axis.text=element_text(size=10),
+    axis.title=element_text(size=11,face="bold"),
+    plot.title = element_text(hjust = 0.5, size=12,face="bold")
+  )
+
+
+
+#Relationship percentage and review rating
+data %>% ggplot(aes(percentage, rating)) +
+  geom_point() +
+  geom_smooth()
+
 #T tests
 t.test(data$rating ~ data$median_price)
 t.test(data$number_of_words ~ data$median_price)
@@ -172,3 +210,5 @@ t.test(data$average_char_length ~ data$median_price)
 t.test(data$familiarity ~ data$median_price)
 t.test(rating ~ median_NDC_scores, data = data %>% filter(median_price == "cheap"))
 t.test(data$NDC_scores~ data$median_price)
+
+t.test(rating ~ zero_percentage, data %>% mutate(zero_percentage = ifelse(percentage == 0, "zero%", "non-zero%")))
