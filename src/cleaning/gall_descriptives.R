@@ -123,8 +123,8 @@ data %>% filter(!is.na(median_price)) %>%  ggplot(aes(x=median_price, y=familiar
 
 #Word unfamiliarity
 data %>% filter(!is.na(median_price)) %>% group_by(median_price) %>% summarize(
-  mean.var = mean(number_of_words, na.rm = TRUE),
-  sd.var = sd(number_of_words, na.rm = TRUE),
+  mean.var = mean(average_sentence_length, na.rm = TRUE),
+  sd.var = sd(average_sentence_length, na.rm = TRUE),
   n.var = n()) %>% 
   mutate(se.var = sd.var / sqrt(n.var),
          lower.ci.var = mean.var - qt(1 - (0.05 / 2), n.var - 1) * se.var,
@@ -135,6 +135,7 @@ data %>% filter(!is.na(median_price)) %>% group_by(median_price) %>% summarize(
   xlab("Price") +
   ylab("Average number of words in sentence") +
   ggtitle("Average sentence length in description of cheap vs expensive wine") +
+  coord_cartesian(ylim = c(10,14)) +
   theme(
     panel.grid.major.y = element_blank(),
     panel.border = element_blank(),
@@ -158,6 +159,7 @@ data %>% filter(!is.na(median_price)) %>% group_by(median_price) %>% summarize(
   xlab("Price") +
   ylab("Word unfamiliarity (% not in top 3000 Subtlex-NL)") +
   ggtitle("Unfamiliarity in product description of cheap vs expensive wine") +
+  coord_cartesian(ylim = c(0.4,0.5)) +
   theme(
     panel.grid.major.y = element_blank(),
     panel.border = element_blank(),
@@ -196,7 +198,20 @@ data %>% group_by(decile_price, median_NDC_scores) %>% summarize(
     plot.title = element_text(hjust = 0.5, size=12,face="bold")
   )
 
-
+#Histogram of price
+data %>% ggplot(aes(price_75)) +
+  geom_histogram() +
+  scale_x_log10() +
+  xlab("Price per 75 CL") +
+  ylab("Number of reviews") +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    axis.text=element_text(size=10),
+    axis.title=element_text(size=11,face="bold"),
+    plot.title = element_text(hjust = 0.5, size=12,face="bold")
+  )
 
 #Relationship percentage and review rating
 data %>% ggplot(aes(percentage, rating)) +
