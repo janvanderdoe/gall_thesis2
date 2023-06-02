@@ -5,7 +5,9 @@ The thesis researches the effect of processing fluency of product descriptions o
 
 # Structure
 data #Raw data with the results from the pretest from Qualtrics
+
 gen #Generated datasets
+
 input #Data scraped from the gall.nl
 - output #The clean datasets
 - paper #The data that was used for the thesis, such as tables
@@ -19,11 +21,11 @@ src #Code in either R or Python
 The library package 'beautifulsoup' was used to retrieve the data from gall.nl. The data cleaning was partially done in R and in Python. The modeling and visualization in R.
 
 Packages needed for Python
-- selenium.webdriver
+- selenium
 - bs4
 - pandas
 - re
-- sleep
+- time
 - json
 - csv
 - requests
